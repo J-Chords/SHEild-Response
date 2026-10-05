@@ -2,7 +2,7 @@
 
 See [`shield/static/images/README.md`](shield/static/images/README.md) for the canonical, colocated asset table (filename, subject, orientation, dimensions and where each image appears).
 
-The interface already contains styled, accessible fallback artwork, so missing photographs do not break the design. Add the final licensed images to `shield/static/images/` using the exact filenames below. Images should be documentary, natural and dignified rather than staged around distress.
+The five approved photographs are now integrated from `shield/static/images/` using the exact filenames below. The imagery is documentary, natural and dignified rather than staged around distress.
 
 ## `hero-women-support.jpg`
 
@@ -20,23 +20,24 @@ The interface already contains styled, accessible fallback artwork, so missing p
 
 ## `professional-woman.jpg`
 
-- Landscape crop, at least 1200 × 700 px.
+- Portrait crop, at least 1000 × 1300 px.
 - An African female counsellor, advocate, social worker or other support professional.
 - Calm, competent and approachable; avoid generic corporate stock-photo poses.
+- Used as the desktop image panel on the Login page and intentionally hidden on narrow screens.
 
 ## `safe-family.jpg`
 
 - Landscape crop, at least 1400 × 900 px.
 - An African family in a safe, everyday environment showing connection and dignity.
 - Do not imply that any depicted person is a survivor.
-- Reserved for a future family-safety or referral feature.
+- Used on the public Safety and Privacy page in a neutral family-wellbeing section.
 
 ## `support-team.jpg`
 
 - Landscape crop, at least 1400 × 900 px.
 - A diverse African support or response team collaborating professionally.
 - Avoid uniforms or branding that could imply a real police, hospital or NGO partnership.
-- Reserved for a future about or responder-training section.
+- Used on the public Support page to introduce coordinated support pathways.
 
 ## Licensing and safety checks
 

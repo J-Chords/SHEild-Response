@@ -2,6 +2,10 @@
 {% block title %}Support resources — SHEild Response{% endblock %}
 {% block content %}
 <section class="page-hero page-hero--compact"><p class="eyebrow">Support directory</p><h1>Support should meet you where you are.</h1><p>These fictional listings demonstrate how verified services could be presented. They are not real service providers.</p></section>
+<section class="section support-story">
+  <div class="support-story__copy"><p class="eyebrow">Coordinated support</p><h2>Different needs can call for different kinds of help.</h2><p>A clear support network can connect people with counselling, legal information, health guidance or safe accommodation. SHEild Response demonstrates how those pathways could be presented in one calm, accessible place.</p><p class="support-story__note">All organisations and contact details shown below are fictional demonstration entries.</p></div>
+  <figure class="support-story__media"><img src="{{ url_for('static', filename='images/support-team.jpg') }}" alt="African community support professionals working together." width="1448" height="1086" loading="lazy"></figure>
+</section>
 <section class="section support-layout">
   <div><div class="section-heading section-heading--left"><h2>Available support types</h2><p>Choose only what feels safe and useful to you.</p></div>
     {% if services %}<div class="service-list">{% for service in services %}<article class="service-card service-card--wide"><div><span class="service-card__category">{{ service.category }}</span><h3>{{ service.name }}</h3><p>{{ service.description }}</p></div><dl>{% if service.phone %}<div><dt>Phone</dt><dd>{{ service.phone }}</dd></div>{% endif %}{% if service.email %}<div><dt>Email</dt><dd>{{ service.email }}</dd></div>{% endif %}{% if service.hours %}<div><dt>Hours</dt><dd>{{ service.hours }}</dd></div>{% endif %}</dl></article>{% endfor %}</div>{% else %}{{ empty_state('No services listed', 'An administrator can add verified support resources.') }}{% endif %}

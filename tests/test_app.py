@@ -1409,3 +1409,50 @@ def test_anonymous_identity_hidden_across_all_role_views_phase6(client, app):
     admin_activity = client.get(f"/admin/activity?q={case_number}")
     assert b"demo@sheild.local" not in admin_activity.data
     assert b"Amina Demo" not in admin_activity.data
+
+
+# ---------------------------------------------------------------------------
+# Final photography integration
+# ---------------------------------------------------------------------------
+
+
+def test_final_photography_files_exist_and_are_referenced(client, app):
+    images_dir = os.path.join(os.path.dirname(__file__), "..", "shield", "static", "images")
+    expected = [
+        "hero-women-support.jpg", "community-support.jpg", "professional-woman.jpg",
+        "safe-family.jpg", "support-team.jpg",
+    ]
+    for filename in expected:
+        path = os.path.join(images_dir, filename)
+        assert os.path.isfile(path), f"missing expected photograph: {filename}"
+        assert os.path.getsize(path) > 1000, f"suspiciously small file: {filename}"
+        # no leftover duplicate source file alongside the real one
+        assert not os.path.isfile(path + ".png"), f"duplicate source file not cleaned up: {filename}.png"
+
+        response = client.get(f"/static/images/{filename}")
+        assert response.status_code == 200
+
+    # hero/community/professional are CSS background-image treatments, so they're
+    # referenced from the stylesheet rather than embedded directly in the page HTML
+    css_path = os.path.join(os.path.dirname(__file__), "..", "shield", "static", "css", "app.css")
+    with open(css_path, encoding="utf-8") as f:
+        css = f.read()
+    assert "hero-women-support.jpg" in css
+    assert "community-support.jpg" in css
+    assert "professional-woman.jpg" in css
+
+    home = client.get("/")
+    assert response.status_code == 200
+    assert b"Help should never feel out of reach" in home.data
+
+    login = client.get("/auth/login")
+    assert b"photo-panel--professional" in login.data
+
+    # safe-family and support-team are real <img> elements with descriptive alt text
+    about_safety = client.get("/about-safety")
+    assert b"safe-family.jpg" in about_safety.data
+    assert b'alt="African family together in a calm home environment."' in about_safety.data
+
+    support = client.get("/support")
+    assert b"support-team.jpg" in support.data
+    assert b'alt="African community support professionals working together."' in support.data
