@@ -7,7 +7,8 @@ Last updated: 5 October 2026
 **Phase 3 status: complete and verified.**  
 **Phase 4 status: complete and verified.**  
 **Phase 5 status: complete and verified.**  
-**Phase 6 status: complete and verified.**
+**Phase 6 status: complete and verified.**  
+**Phase 7 status: complete and verified.**
 
 ## Implemented
 
@@ -59,9 +60,16 @@ Last updated: 5 October 2026
 - Added lightweight submit-button feedback (disables the button and shows "Submitting…" after a valid submit) across every form site-wide, with a `:disabled` button style; this cannot interfere with server-side validation retries since it never calls `preventDefault()` and the disabled state does not survive a real page reload.
 - Confirmed, rather than assumed: no absolute privacy/security claims ("100% secure", "completely anonymous", etc.) exist anywhere in the copy; existing wording was already appropriately qualified from earlier phases.
 
+## Phase 7 additions
+
+- Added repeat-safe `seed-final-demo` CLI workflow with 15 canonical defence cases, four linked SOS alerts, a second fictional responder, six active fictional services, four non-dialable fictional contacts, selected rich timelines and intentional six-month/category/risk/status/workload distributions.
+- Added `DEFENCE_DEMO_GUIDE.md` and `SCREENSHOT_CHECKLIST.md` for a concise presentation and reproducible 1366 × 768 report captures.
+- Audited legacy `@shield.demo` accounts before cleanup: relationship-bearing accounts were deactivated; only the dependency-free legacy responder was removed. A verified pre-Phase-7 database backup is retained in `instance/backups/`.
+- Removed the uniquely identified obsolete unlinked baseline alert (`SOS-…-0001`) during final seeding; all four active defence alerts are now linked to CRITICAL SOS incidents. Normal baseline seeding still creates its original alert for isolated tests until the final-demo marker exists.
+
 ## Currently working on
 
-- Phases 1–6 are implemented and verified. Awaiting review/approval before final demo seeding.
+- No software phase is currently open. The completed application is ready for final photography and report screenshots.
 
 ## Remaining / recommended future work
 
@@ -71,7 +79,7 @@ Last updated: 5 October 2026
 - Add pagination for large datasets and CSV/PDF exports with an explicit privacy review.
 - Add database migrations with Flask-Migrate before changing production-like schemas.
 - Conduct specialist accessibility, safeguarding, security and data-protection reviews before any real-world pilot.
-- Replace all demonstration contacts with independently verified, jurisdiction-specific services.
+- Before any real-world deployment, replace fictional demo contacts with independently verified, jurisdiction-specific services.
 - Add final licensed photography (see "Image files still required" below) — the only remaining item from the Phase 6 brief, deliberately left to the project owner since it requires real, rights-cleared images.
 - Consider a small visual pass on "View cases → / Disable" stacking on the responder-management table, and on the admin incidents filter bar's density at very narrow widths — both cosmetic, non-blocking.
 
@@ -93,7 +101,7 @@ None of these exist yet; every reference below already has a working CSS gradien
 - The current sequence generator is suitable for a local prototype; a deployed multi-worker system would need transactional reference allocation.
 - No email, SMS, geolocation, map, police, hospital, NGO or emergency-dispatch integration exists.
 - Pagination uses simple offset-based `paginate()` on incidents, users and the activity log; fine for prototype data volumes, not tuned for very large tables.
-- The database still contains a handful of pre-existing `@shield.demo` test accounts from an earlier seeding convention (now superseded by `@sheild.local`). They predate this phase, are unreferenced by any current route or test, and were left in place rather than deleted, per the standing "do not delete existing data" instruction.
+- Three relationship-bearing legacy `@shield.demo` accounts remain inactive to preserve historical foreign-key relationships. The dependency-free `zainab@shield.demo` account was intentionally removed by the final-demo cleanup routine after a database backup was verified.
 
 ## Verification
 
@@ -113,8 +121,26 @@ None of these exist yet; every reference below already has a working CSS gradien
 - Live-verified the full Phase 5 admin workflow against the running app with real CSRF protection active, following all 19 prescribed manual-verification steps: dashboard metrics and all six charts confirmed to reflect live database values (read the embedded JSON chart data directly); filtered incidents by reference; assigned an unassigned case to a responder, then deliberately reassigned it to a newly created fictional responder (both steps produced separate, distinct timeline entries); created that responder, logged in as them, deactivated them (friendly "deactivated" login message confirmed, dashboard unreachable), then reactivated them (login restored); created a fictional support service and confirmed it appeared on the public `/support` page, then deactivated it and confirmed it disappeared; did the same create/confirm/deactivate/confirm cycle for a fictional emergency contact; reviewed the admin activity log (case references, assignment/reassignment entries, visibility tags all present); and confirmed a freshly submitted anonymous case showed "Anonymous Report"/"Anonymous report" with no reporter name or email in the admin case view, the admin activity log, and the responder case view. Restored the database to its original baseline afterward; no schema changes were needed in Phase 5 (all new functionality is query/presentation logic over the existing columns).
 - Phase 6 used a real headless-browser visual QA pass (Playwright, installed temporarily for this purpose only and removed again afterward — not a project dependency) rather than a code-only review: screenshotted every major public/reporter/responder/admin page at 1366×768 (the target defence resolution) and 390×844 (mobile), checked the browser console and network tab for errors on each, and confirmed zero JavaScript errors, zero unexpected 404s (the two expected ones are the not-yet-supplied `hero-women-support.jpg`/`community-support.jpg`, which fall back gracefully by design) and zero remote network requests anywhere in the app. This is how the five bugs listed above were actually found, not inferred from reading CSS. Verified the mobile hamburger menu, the demo-resolution admin dashboard with charts, and real end-to-end form submission (login → navigate → fill → submit → flash message → rendered result) through the browser, not just the test client.
 
+### Phase 7 verification
+
+- Baseline: 75/75 tests passed before any Phase 7 change.
+- Final suite: 83/83 tests passed, including repeat safety, canonical hashed accounts, distribution quality, linked SOS integrity, both responder workloads, meaningful chart inputs, legacy cleanup and anonymous operational-view protection.
+- Live `seed-final-demo` ran twice without duplicate users, cases, alerts, updates, services or contacts.
+- Resulting SQLite data: 17 cases (13 normal / 4 SOS), nine categories, all four risks, all seven case statuses, six populated months, all four alert statuses, 6/5 cases across the two active responders and five unassigned cases.
+- Live route QA: all public, reporter, responder and administrator pages in the Phase 7 checklist returned HTTP 200 using the seeded persistent database; Emergency Access correctly resolves at `/emergency`.
+- Live security QA: reporter-to-responder, reporter-to-admin and responder-to-admin access returned 403; unsigned logout POST returned 400; dependent legacy account login was denied as deactivated; anonymous reporter identity and internal notes were absent from reporter/responder/admin operational responses as applicable.
+- Offline QA: Chart.js loads from `shield/static/vendor/chartjs/chart.umd.min.js`; all six chart datasets were present in page-local JSON; no remote scripts, fonts or images are required; Playwright/Selenium were not added.
+- Public directory QA: four active contacts use non-dialable `DEMO-*` values, all active services/contacts are explicitly fictional, and the unverified legacy `112` entry is inactive and absent from the public page.
+
 ## Demo accounts
 
 - Reporter: `demo@sheild.local` / `Demo123!`
 - Responder: `responder@sheild.local` / `Responder123!`
+- Additional responder: `responder2@sheild.local` / `Responder2Pass!`
 - Administrator: `admin@sheild.local` / `Admin123!`
+
+## Final completion status
+
+- **Core application development: COMPLETE**
+- **Final QA: COMPLETE**
+- **Remaining external task:** insert the five approved local photography files, capture final screenshots, and update the academic report.

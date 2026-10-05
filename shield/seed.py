@@ -76,7 +76,10 @@ def seed_database():
         ])
 
     alert_number = f"SOS-{date.today().year}-0001"
-    if EmergencyAlert.query.filter_by(alert_number=alert_number).first() is None:
+    final_demo_marker = Incident.query.filter_by(
+        case_number=f"SHR-{date.today().year}-0101"
+    ).first()
+    if final_demo_marker is None and EmergencyAlert.query.filter_by(alert_number=alert_number).first() is None:
         db.session.add(EmergencyAlert(
             alert_number=alert_number, reporter=reporter,
             location="Demo community centre", safe_contact="0800 000 0101",

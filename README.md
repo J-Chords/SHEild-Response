@@ -40,12 +40,25 @@ To initialize or re-check the demo dataset explicitly:
 python -m flask --app app seed-demo
 ```
 
+## Final defence demonstration
+
+For a clean, meaningful final-year-project demonstration:
+
+```powershell
+python -m pip install -r requirements.txt
+python -m flask --app app seed-final-demo
+python app.py
+```
+
+Then open <http://127.0.0.1:5000>. The final seed is repeat-safe and creates a six-month fictional operational dataset for every dashboard chart, two responder workloads, unassigned cases, anonymous reports, and four linked SOS examples. It does not reset or destroy the database. This is application demonstration data, not questionnaire or research-result data.
+
 ## Demo accounts
 
 | Role | Email | Password |
 |---|---|---|
 | Reporter | `demo@sheild.local` | `Demo123!` |
 | Responder | `responder@sheild.local` | `Responder123!` |
+| Additional responder | `responder2@sheild.local` | `Responder2Pass!` |
 | Administrator | `admin@sheild.local` | `Admin123!` |
 
 These credentials are deliberately public for local assessment. Never reuse them in a deployed system.
@@ -55,6 +68,8 @@ These credentials are deliberately public for local assessment. Never reuse them
 ```powershell
 python -m pytest -q
 ```
+
+Use [DEFENCE_DEMO_GUIDE.md](DEFENCE_DEMO_GUIDE.md) for the 5–8 minute presentation flow and [SCREENSHOT_CHECKLIST.md](SCREENSHOT_CHECKLIST.md) for the final report captures.
 
 ## Configuration
 

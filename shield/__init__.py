@@ -80,6 +80,27 @@ def create_app(test_config=None):
         seed_database()
         click.echo("SHEild Response demo data is ready.")
 
+    @app.cli.command("seed-final-demo")
+    def seed_final_demo_command():
+        """Create the repeat-safe final defence demonstration dataset."""
+        from .final_demo import seed_final_demo
+        from .schema import ensure_schema
+
+        db.create_all()
+        ensure_schema()
+        result = seed_final_demo()
+        deactivated = ", ".join(result["legacy"]["deactivated"]) or "none"
+        removed = ", ".join(result["legacy"]["removed"]) or "none"
+        click.echo("SHEild Response final defence dataset is ready.")
+        click.echo(f"Legacy accounts deactivated: {deactivated}")
+        click.echo(f"Dependency-free legacy accounts removed: {removed}")
+        click.echo(
+            "Obsolete unlinked baseline alert removed: "
+            f"{'yes' if result['obsolete_alert_removed'] else 'not present'}"
+        )
+        click.echo(f"Final demo cases ensured: {len(result['case_numbers'])}")
+        click.echo(f"Linked SOS alerts ensured: {len(result['alert_numbers'])}")
+
     with app.app_context():
         from .seed import seed_database
         from .schema import ensure_schema
