@@ -1,0 +1,17 @@
+{% extends 'base.html' %}{% from 'macros/forms.html' import status_badge %}
+{% block title %}Report received — SHEild Response{% endblock %}
+{% block content %}
+<section class="dashboard-shell">{% include 'partials/dashboard_nav.html' %}<div class="dashboard-main confirmation-wrap">
+  <div class="confirmation-card">
+    <span class="confirmation-card__icon" aria-hidden="true">✓</span>
+    <p class="eyebrow">Report received</p>
+    <h1>Your report has been recorded.</h1>
+    <p class="confirmation-card__lead">Keep this private case reference. You can use it to recognise and track your report inside your account.</p>
+    <div class="case-reference"><span>Case reference</span><strong>{{ incident.case_number }}</strong></div>
+    <div class="confirmation-grid"><div><span>Current status</span>{{ status_badge(incident.status) }}</div><div><span>Rules-based risk level</span>{{ status_badge(incident.risk_level) }}</div><div><span>Identity setting</span><strong>{{ 'Hidden from responders' if incident.is_anonymous else 'Account-linked' }}</strong></div></div>
+    <div class="risk-explanation risk-explanation--plain"><h2>Why this priority was assigned</h2><p>{{ assessment.explanation }}</p><small>This is a deterministic rules-based result, not AI. An authorised reviewer can update the assessment as a case develops.</small></div>
+    <div class="prototype-warning"><strong>No external service was contacted.</strong> This academic prototype does not dispatch police, medical services or support organisations.</div>
+    <div class="confirmation-actions"><a class="button" href="{{ url_for('reporter.report_detail', incident_id=incident.id) }}">View case timeline</a><a class="button button--secondary" href="{{ url_for('reporter.reports') }}">Go to My Reports</a></div>
+  </div>
+</div></section>
+{% endblock %}

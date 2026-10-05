@@ -1,0 +1,32 @@
+{% macro render_field(field, hint='') %}
+  <div class="field {% if field.errors %}field--error{% endif %}">
+    {% if field.type == 'BooleanField' %}
+      <label class="check-row">{{ field() }}<span>{{ field.label.text }}</span></label>
+    {% else %}
+      {{ field.label }}
+      {{ field(class='input', **kwargs) }}
+    {% endif %}
+    {% if hint %}<p class="field__hint">{{ hint }}</p>{% endif %}
+    {% for error in field.errors %}<p class="field__error">{{ error }}</p>{% endfor %}
+  </div>
+{% endmacro %}
+
+{% macro status_badge(value) %}
+  <span class="badge badge--{{ value|lower|replace('_', '-') }}">{{ value|replace('_', ' ')|title }}</span>
+{% endmacro %}
+
+{% macro empty_state(title, message, action_url='', action_label='') %}
+  <div class="empty-state"><div class="empty-state__icon">◇</div><h3>{{ title }}</h3><p>{{ message }}</p>{% if action_url %}<a class="button button--secondary" href="{{ action_url }}">{{ action_label }}</a>{% endif %}</div>
+{% endmacro %}
+
+{% macro clear_filters_link(endpoint) %}<a class="filter-bar__clear" href="{{ url_for(endpoint) }}">Clear filters</a>{% endmacro %}
+
+{% macro pagination(pager, endpoint) %}
+  {% if pager.pages > 1 %}
+  <nav class="pager" aria-label="Pagination">
+    {% if pager.has_prev %}<a class="pager__link" href="{{ url_for(endpoint, **dict(request.args, page=pager.prev_num)) }}">← Previous</a>{% else %}<span class="pager__link pager__link--disabled">← Previous</span>{% endif %}
+    <span class="pager__status">Page {{ pager.page }} of {{ pager.pages }} · {{ pager.total }} total</span>
+    {% if pager.has_next %}<a class="pager__link" href="{{ url_for(endpoint, **dict(request.args, page=pager.next_num)) }}">Next →</a>{% else %}<span class="pager__link pager__link--disabled">Next →</span>{% endif %}
+  </nav>
+  {% endif %}
+{% endmacro %}

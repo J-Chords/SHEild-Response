@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% from 'macros/forms.html' import empty_state, clear_filters_link, pagination %}
+{% block title %}Admin activity — SHEild Response{% endblock %}
+{% block content %}<section class="dashboard-shell">{% include 'partials/dashboard_nav.html' %}<div class="dashboard-main"><div class="dashboard-heading"><div><p class="eyebrow">Audit & oversight</p><h1>Activity log</h1><p>Every case-timeline entry across the system, including internal notes. Admin is an authorised operational role.</p></div></div>
+<form class="filter-bar" method="get">
+  <label>Case reference<input class="input" type="search" name="q" value="{{ case_search }}" placeholder="SHR-2026-0001"></label>
+  <label>Update type<select class="input" name="update_type"><option value="">All types</option>{% for value in update_types %}<option value="{{ value }}" {{ 'selected' if selected_update_type == value }}>{{ update_type_label(value) }}</option>{% endfor %}</select></label>
+  <label>Visibility<select class="input" name="visibility"><option value="">All visibilities</option>{% for value in visibilities %}<option value="{{ value }}" {{ 'selected' if selected_visibility == value }}>{{ value|replace('_',' ')|title }}</option>{% endfor %}</select></label>
+  <label>Date<input class="input" type="date" name="date" value="{{ selected_date }}"></label>
+  <button class="button button--secondary" type="submit">Apply</button>
+  {{ clear_filters_link('admin.activity') }}
+</form>
+<div class="content-card">{% if updates %}<div class="data-table-wrap"><table class="data-table"><thead><tr><th>When</th><th>Case</th><th>Type</th><th>Visibility</th><th>Author</th><th>Summary</th></tr></thead><tbody>{% for update in updates %}<tr><td><small>{{ update.created_at.strftime('%d %b %Y · %H:%M') }}</small></td><td><a href="{{ url_for('admin.incident_detail', incident_id=update.incident_id) }}">{{ update.incident.case_number }} →</a></td><td>{{ describe_update(update) }}</td><td><span class="timeline-tag timeline-tag--{{ 'internal' if update.visibility == 'INTERNAL' else ('system' if update.visibility == 'SYSTEM' else 'reporter') }}">{{ update.visibility|replace('_',' ')|title }}</span></td><td>{{ update_author_label(update) }}</td><td>{{ update.note }}</td></tr>{% endfor %}</tbody></table></div>{{ pagination(pager, 'admin.activity') }}{% else %}{{ empty_state('No matching activity', 'Try changing the selected filters.') }}{% endif %}</div></div></section>{% endblock %}

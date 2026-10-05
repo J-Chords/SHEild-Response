@@ -1,0 +1,30 @@
+{% extends 'base.html' %}{% from 'macros/forms.html' import status_badge, empty_state %}
+{% block title %}Reporter dashboard — SHEild Response{% endblock %}
+{% block content %}
+<section class="dashboard-shell">{% include 'partials/dashboard_nav.html' %}<div class="dashboard-main">
+  <div class="dashboard-heading">
+    <div><p class="eyebrow">Reporter overview</p><h1>Welcome, {{ current_user.full_name.split()[0] }}.</h1><p>Your private space for reports, progress and support options.</p></div>
+    <div class="dashboard-heading__actions"><a class="button button--danger" href="{{ url_for('reporter.sos') }}">Demo SOS</a><a class="button" href="{{ url_for('reporter.new_report') }}">+ Report Incident</a></div>
+  </div>
+  <div class="safety-callout"><div><span class="safety-callout__icon">!</span><div><strong>Are you in immediate danger?</strong><p>This prototype cannot dispatch help. Move somewhere safer if possible and contact a verified local emergency service.</p></div></div><a href="{{ url_for('main.support') }}">View emergency contacts</a></div>
+  <div class="metric-grid metric-grid--3">
+    <article><span>Total reports</span><strong>{{ metrics.total }}</strong><small>Submitted by your account</small></article>
+    <article><span>Active reports</span><strong>{{ metrics.active }}</strong><small>Not yet resolved or closed</small></article>
+    <article><span>Resolved reports</span><strong>{{ metrics.resolved }}</strong><small>Resolved or closed cases</small></article>
+  </div>
+  <div class="content-grid content-grid--two dashboard-row">
+    <section class="content-card">
+      <div class="card-heading"><div><h2>Recent cases</h2><p>Your most recently submitted reports.</p></div><a href="{{ url_for('reporter.reports') }}">View all</a></div>
+      {% if incidents %}<div class="case-list">{% for incident in incidents[:4] %}<a class="case-row" href="{{ url_for('reporter.report_detail', incident_id=incident.id) }}"><div><strong>{{ incident.case_number }}</strong><span>{{ incident.category }} · {{ incident.created_at.strftime('%d %b %Y') }}</span></div><div>{{ status_badge(incident.status) }}<span class="case-row__arrow">→</span></div></a>{% endfor %}</div>{% else %}{{ empty_state('No reports yet', 'When you are ready, you can submit a report securely.', url_for('reporter.new_report'), 'Start a report') }}{% endif %}
+    </section>
+    <section class="content-card">
+      <div class="card-heading"><div><h2>Latest updates</h2><p>Reporter-visible activity across your cases.</p></div></div>
+      {% if latest_updates %}<div class="update-list">{% for update in latest_updates %}<a href="{{ url_for('reporter.report_detail', incident_id=update.incident_id) }}"><span class="update-list__dot"></span><div><strong>{{ update.status|replace('_', ' ')|title }}</strong><p>{{ update.incident.case_number }} · {{ update.note|truncate(80) }}</p><small>{{ update.created_at.strftime('%d %b · %H:%M') }}</small></div></a>{% endfor %}</div>{% else %}{{ empty_state('No updates yet', 'Case updates that are safe to share will appear here.') }}{% endif %}
+    </section>
+  </div>
+  <section class="content-card support-shortcut">
+    <div><p class="eyebrow">Support at your pace</p><h2>You can explore help without submitting another report.</h2><p>Browse fictional demonstration services and clearly labelled emergency contacts.</p><a class="button button--secondary" href="{{ url_for('main.support') }}">Open support directory</a></div>
+    <div class="support-shortcut__services">{% for service in services %}<div><span>{{ service.category }}</span><strong>{{ service.name }}</strong></div>{% endfor %}</div>
+  </section>
+</div></section>
+{% endblock %}

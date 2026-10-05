@@ -1,0 +1,37 @@
+{% extends 'base.html' %}{% from 'macros/forms.html' import status_badge, empty_state %}
+{% block title %}Administration — SHEild Response{% endblock %}
+{% block head %}<script defer src="{{ url_for('static', filename='vendor/chartjs/chart.umd.min.js') }}"></script><script defer src="{{ url_for('static', filename='js/admin_dashboard.js') }}"></script>{% endblock %}
+{% block content %}<section class="dashboard-shell">{% include 'partials/dashboard_nav.html' %}<div class="dashboard-main">
+<div class="dashboard-heading"><div><p class="eyebrow">System administration</p><h1>Operational overview</h1><p>Monitor the fictional dataset without exposing unnecessary sensitive information.</p></div><span class="last-updated">Local prototype data</span></div>
+
+<div class="metric-grid metric-grid--3">
+  <article><span>Total reports</span><strong>{{ metrics.total_reports }}</strong><small>All sources, all time</small></article>
+  <article><span>Active cases</span><strong>{{ metrics.active_cases }}</strong><small>Not resolved or closed</small></article>
+  <article class="metric--critical"><span>Critical active cases</span><strong>{{ metrics.critical_active }}</strong><small>Open and marked critical</small></article>
+</div>
+<div class="metric-grid metric-grid--3">
+  <article class="metric--alert"><a href="{{ url_for('admin.alerts', status='NEW') }}"><span>New SOS alerts</span><strong>{{ metrics.new_alerts }}</strong><small>Awaiting first response</small></a></article>
+  <article><a href="{{ url_for('admin.incidents', status='IN_PROGRESS') }}"><span>In progress</span><strong>{{ metrics.in_progress }}</strong><small>Cases being actioned</small></a></article>
+  <article><a href="{{ url_for('admin.incidents', status='REFERRED') }}"><span>Referred</span><strong>{{ metrics.referred }}</strong><small>Cases referred onward</small></a></article>
+</div>
+<div class="metric-grid metric-grid--3">
+  <article><a href="{{ url_for('admin.incidents', status='RESOLVED') }}"><span>Resolved</span><strong>{{ metrics.resolved }}</strong><small>Cases marked resolved</small></a></article>
+  <article><a href="{{ url_for('admin.users', role='REPORTER') }}"><span>Registered reporters</span><strong>{{ metrics.reporters }}</strong><small>Active reporter accounts</small></a></article>
+  <article><a href="{{ url_for('admin.responders') }}"><span>Active responders</span><strong>{{ metrics.responders }}</strong><small>Available to assign</small></a></article>
+</div>
+
+<div class="chart-grid">
+  <section class="chart-card chart-card--wide"><h2>Incidents by category</h2><p>All incidents, every status.</p><div class="chart-card__canvas-wrap"><canvas id="chart-category" role="img" aria-label="Bar chart of incidents by category"></canvas></div></section>
+  <section class="chart-card"><h2>Incidents by risk level</h2><p>Current assessed risk, all cases.</p><div class="chart-card__canvas-wrap"><canvas id="chart-risk" role="img" aria-label="Doughnut chart of incidents by risk level"></canvas></div></section>
+  <section class="chart-card"><h2>Cases by status</h2><p>Where cases sit in the workflow.</p><div class="chart-card__canvas-wrap"><canvas id="chart-status" role="img" aria-label="Bar chart of cases by status"></canvas></div></section>
+  <section class="chart-card chart-card--wide"><h2>Reports over time</h2><p>New incidents submitted per month, last 6 months.</p><div class="chart-card__canvas-wrap"><canvas id="chart-timeline" role="img" aria-label="Line chart of reports submitted per month"></canvas></div></section>
+  <section class="chart-card"><h2>Report source</h2><p>Normal reports vs. emergency SOS.</p><div class="chart-card__canvas-wrap"><canvas id="chart-source" role="img" aria-label="Doughnut chart of report source"></canvas></div></section>
+  <section class="chart-card"><h2>Emergency alert status</h2><p>Current state of all demo SOS alerts.</p><div class="chart-card__canvas-wrap"><canvas id="chart-alert-status" role="img" aria-label="Doughnut chart of emergency alert status"></canvas></div></section>
+</div>
+
+<section class="content-card"><div class="card-heading"><div><h2>Recently submitted cases</h2><p>Identity-minimised operational view.</p></div><a href="{{ url_for('admin.incidents') }}">View all incidents</a></div>{% if recent %}<div class="data-table-wrap"><table class="data-table"><thead><tr><th>Reference</th><th>Category</th><th>Risk</th><th>Status</th><th>Responder</th><th></th></tr></thead><tbody>{% for incident in recent %}<tr><td><strong>{% if incident.source == 'SOS' %}<span class="sos-flag" title="Originated from emergency SOS">!</span>{% endif %}{{ incident.case_number }}</strong></td><td>{{ incident.category }}</td><td>{{ status_badge(incident.risk_level) }}</td><td>{{ status_badge(incident.status) }}</td><td>{{ incident.assigned_to.full_name if incident.assigned_to else 'Unassigned' }}</td><td><a class="table-action" href="{{ url_for('admin.incident_detail', incident_id=incident.id) }}">Manage →</a></td></tr>{% endfor %}</tbody></table></div>{% else %}{{ empty_state('No cases', 'Cases submitted in the prototype will appear here.') }}{% endif %}</section>
+
+<section class="content-card"><div class="card-heading"><div><h2>Active emergency alerts</h2><p>Fictional demo SOS alerts awaiting resolution.</p></div><a href="{{ url_for('admin.alerts') }}">View all alerts</a></div>{% if active_alerts %}<div class="data-table-wrap"><table class="data-table"><thead><tr><th>Alert</th><th>Linked case</th><th>Risk</th><th>Location</th><th>Status</th><th>Responder</th><th></th></tr></thead><tbody>{% for alert in active_alerts %}<tr><td><strong>{{ alert.alert_number }}</strong></td><td>{% if alert.incident %}{{ alert.incident.case_number }}{% else %}—{% endif %}</td><td>{{ status_badge(alert.incident.risk_level) if alert.incident else '—' }}</td><td>{{ alert.location }}</td><td>{{ status_badge(alert.status) }}</td><td>{{ alert.assigned_to.full_name if alert.assigned_to else 'Unassigned' }}</td><td>{% if alert.incident %}<a class="table-action" href="{{ url_for('admin.incident_detail', incident_id=alert.incident.id) }}">Manage case →</a>{% endif %}</td></tr>{% endfor %}</tbody></table></div>{% else %}{{ empty_state('Queue clear', 'There are no active demonstration SOS alerts.') }}{% endif %}</section>
+
+<script type="application/json" id="admin-dashboard-data">{{ chart_data|tojson }}</script>
+</div></section>{% endblock %}

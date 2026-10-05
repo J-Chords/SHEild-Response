@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% from 'macros/forms.html' import status_badge %}
+{% block title %}Emergency request recorded — SHEild Response{% endblock %}
+{% block content %}
+<section class="dashboard-shell">{% include 'partials/dashboard_nav.html' %}<div class="dashboard-main confirmation-wrap">
+  <div class="confirmation-card">
+    <span class="confirmation-card__icon confirmation-card__icon--danger" aria-hidden="true">!</span>
+    <p class="eyebrow">Demo SOS recorded</p>
+    <h1>Emergency request recorded.</h1>
+    <p class="confirmation-card__lead">This automatically created a critical-priority case and placed it in the responder emergency queue for immediate review. Keep this reference to track it.</p>
+    <div class="case-reference"><span>Case reference</span><strong>{{ incident.case_number }}</strong></div>
+    <div class="confirmation-grid"><div><span>Submitted</span><strong>{{ incident.created_at.strftime('%d %b %Y · %H:%M') }}</strong></div><div><span>Risk</span><strong>CRITICAL</strong></div><div><span>Emergency status</span>{{ status_badge(alert.status) }}</div></div>
+    <div class="prototype-warning"><strong>No external service was contacted.</strong> This academic prototype does not dispatch police, medical services or support organisations.</div>
+    <div class="confirmation-actions"><a class="button" href="{{ url_for('reporter.report_detail', incident_id=incident.id) }}">View Case</a><a class="button button--secondary" href="{{ url_for('main.support') }}">Support Resources</a><a class="button button--secondary" href="{{ url_for('reporter.dashboard') }}">Return to Dashboard</a></div>
+  </div>
+</div></section>
+{% endblock %}

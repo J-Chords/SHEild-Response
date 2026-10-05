@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Emergency SOS access — SHEild Response{% endblock %}
+{% block content %}
+<section class="auth-layout">
+  <div class="auth-copy">
+    <a class="back-link" href="{{ url_for('main.home') }}">← Back to home</a>
+    <p class="eyebrow">Emergency workflow demonstration</p>
+    <h1>Are you in immediate danger?</h1>
+    <p>This academic prototype cannot dispatch real help. If it is safe to do so, contact a verified emergency number in your location first.</p>
+    <div class="auth-reassurance"><span>✓</span><p><strong>Academic prototype</strong><br>Sending a demo emergency request here does not contact police, medical or NGO services.</p></div>
+  </div>
+  <div class="form-card">
+    <div class="form-card__heading"><h2>Sign in to send a trackable emergency request</h2><p>A secure account lets you (and only you) follow your case reference afterwards. Sign in or create a private account, and you'll be taken straight to the emergency form.</p></div>
+    <a class="button button--danger button--full" href="{{ url_for('auth.login', next=url_for('reporter.sos')) }}">Sign in and continue</a>
+    <div class="form-divider"><span>New to SHEild?</span></div>
+    <a class="button button--secondary button--full" href="{{ url_for('auth.register', next=url_for('reporter.sos')) }}">Create a secure account</a>
+    <details class="demo-accounts">
+      <summary>View demo sign-in details</summary>
+      <p><strong>Reporter:</strong> demo@sheild.local / Demo123!</p>
+    </details>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}{% from 'macros/forms.html' import status_badge, empty_state %}
+{% block title %}Responder dashboard — SHEild Response{% endblock %}
+{% block content %}<section class="dashboard-shell">{% include 'partials/dashboard_nav.html' %}<div class="dashboard-main">
+<div class="dashboard-heading"><div><p class="eyebrow">Responder workspace</p><h1>Good day, {{ current_user.full_name.split()[0] }}.</h1><p>Prioritise safety, record concise actions and minimise sensitive data.</p></div><a class="button button--secondary" href="{{ url_for('responder.cases') }}">Open case queue</a></div>
+
+<div class="metric-grid metric-grid--6">
+  <article class="metric--alert"><a href="{{ url_for('responder.alerts', status='NEW') }}"><span>New emergency alerts</span><strong>{{ metrics.new_alerts }}</strong><small>Awaiting first response</small></a></article>
+  <article class="metric--critical"><a href="{{ url_for('responder.cases', risk='CRITICAL') }}"><span>Critical active cases</span><strong>{{ metrics.critical_active }}</strong><small>Across the whole queue</small></a></article>
+  <article><a href="{{ url_for('responder.cases', assignment='mine') }}"><span>My assigned cases</span><strong>{{ metrics.my_assigned }}</strong><small>Not resolved or closed</small></a></article>
+  <article><a href="{{ url_for('responder.cases', assignment='mine', status='IN_PROGRESS') }}"><span>In progress</span><strong>{{ metrics.in_progress }}</strong><small>Of my assigned cases</small></a></article>
+  <article><a href="{{ url_for('responder.cases', assignment='mine', status='REFERRED') }}"><span>Referred</span><strong>{{ metrics.referred }}</strong><small>Of my assigned cases</small></a></article>
+  <article><a href="{{ url_for('responder.cases', assignment='mine', status='RESOLVED') }}"><span>Resolved</span><strong>{{ metrics.resolved }}</strong><small>Of my assigned cases</small></a></article>
+</div>
+
+<section class="content-card">
+  <div class="card-heading"><div><h2>Emergency queue</h2><p>Sorted by risk, oldest waiting first. Fictional demo alerts only.</p></div><a href="{{ url_for('responder.alerts') }}">View all</a></div>
+  {% if emergency_queue %}<div class="case-list">{% for alert in emergency_queue[:6] %}<a class="case-row case-row--alert" href="{{ url_for('responder.alert_detail', alert_id=alert.id) }}"><div><strong>{{ alert.incident.case_number if alert.incident else alert.alert_number }}</strong><span>{{ alert.incident.category ~ ' · ' if alert.incident }}{{ alert.location }} · {{ alert.created_at.strftime('%d %b %H:%M') }}</span></div><div>{% if alert.incident %}{{ status_badge(alert.incident.risk_level) }}{% endif %}{{ status_badge(alert.status) }}<span class="case-row__arrow">→</span></div></a>{% endfor %}</div>{% else %}{{ empty_state('Queue clear', 'There are no active demonstration emergency alerts.') }}{% endif %}
+</section>
+
+<div class="content-grid content-grid--two">
+  <section class="content-card">
+    <div class="card-heading"><div><h2>My assigned cases</h2><p>Your active caseload.</p></div><a href="{{ url_for('responder.cases', assignment='mine') }}">View queue</a></div>
+    {% if assigned %}<div class="case-list">{% for incident in assigned %}<a class="case-row" href="{{ url_for('responder.case_detail', incident_id=incident.id) }}"><div><strong>{% if incident.source == 'SOS' %}<span class="sos-flag" title="Originated from emergency SOS">!</span>{% endif %}{{ incident.case_number }}</strong><span>{{ incident.category }} · updated {{ incident.updated_at.strftime('%d %b') }}</span></div><div>{{ status_badge(incident.risk_level) }}<span class="case-row__arrow">→</span></div></a>{% endfor %}</div>{% else %}{{ empty_state('No assigned cases', 'Claim an unassigned case when you are ready.') }}{% endif %}
+  </section>
+  <section class="content-card">
+    <div class="card-heading"><div><h2>Unassigned priority cases</h2><p>Highest risk, longest waiting first.</p></div><a href="{{ url_for('responder.cases', assignment='unassigned') }}">View queue</a></div>
+    {% if unassigned %}<div class="case-list">{% for incident in unassigned %}<a class="case-row" href="{{ url_for('responder.case_detail', incident_id=incident.id) }}"><div><strong>{% if incident.source == 'SOS' %}<span class="sos-flag" title="Originated from emergency SOS">!</span>{% endif %}{{ incident.case_number }}</strong><span>{{ incident.category }} · waiting since {{ incident.created_at.strftime('%d %b') }}</span></div><div>{{ status_badge(incident.risk_level) }}<span class="case-row__arrow">→</span></div></a>{% endfor %}</div>{% else %}{{ empty_state('No unassigned cases', 'All current cases are claimed.') }}{% endif %}
+  </section>
+</div>
+
+<section class="content-card">
+  <div class="card-heading"><div><h2>Recent activity</h2><p>Latest case-timeline updates across your accessible cases.</p></div></div>
+  {% if recent_activity %}<ol class="timeline timeline--compact">{% for update in recent_activity %}<li><span class="timeline__dot"></span><div><div class="timeline__meta"><strong>{{ update.incident.case_number }} · {{ describe_update(update) }}</strong><time>{{ update.created_at.strftime('%d %b · %H:%M') }}</time></div><p>{{ update.note }}</p></div></li>{% endfor %}</ol>{% else %}{{ empty_state('No recent activity', 'Updates recorded on accessible cases will appear here.') }}{% endif %}
+</section>
+
+</div></section>{% endblock %}

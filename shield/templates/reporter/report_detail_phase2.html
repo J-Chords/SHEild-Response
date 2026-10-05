@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% from 'macros/forms.html' import status_badge %}
+{% block title %}{{ incident.case_number }} — SHEild Response{% endblock %}
+{% block content %}
+<section class="dashboard-shell">{% include 'partials/dashboard_nav.html' %}<div class="dashboard-main">
+  <a class="back-link" href="{{ url_for('reporter.reports') }}">← Back to my reports</a>
+  <div class="case-heading"><div><p class="eyebrow">Case reference</p><h1>{{ incident.case_number }}</h1><p>Submitted {{ incident.created_at.strftime('%d %B %Y at %H:%M') }}</p></div><div class="case-heading__badges">{% if incident.source == 'SOS' %}<span class="badge badge--critical">Emergency SOS</span>{% endif %}{{ status_badge(incident.risk_level) }}{{ status_badge(incident.status) }}</div></div>
+  <div class="assignment-state"><span class="{{ 'assignment-state__ready' if incident.assigned_to_id else '' }}">●</span><div><strong>{{ 'A responder has been assigned' if incident.assigned_to_id else 'Responder assignment pending' }}</strong><p>{{ 'Your responder can now record progress updates. Personal staff details are not shown here.' if incident.assigned_to_id else 'The report remains in the review queue. No staff identity is exposed.' }}</p></div></div>
+  <div class="content-grid content-grid--case">
+    <div>
+      <section class="content-card"><div class="card-heading"><div><h2>Case timeline</h2><p>Only updates marked safe to share with you appear here.</p></div></div><ol class="timeline">{% for update in updates|reverse %}<li class="{{ 'timeline__current' if loop.first }}"><span class="timeline__dot"></span><div><div class="timeline__meta"><strong>{{ describe_update(update) }}</strong><time>{{ update.created_at.strftime('%d %b %Y · %H:%M') }}</time></div><p>{{ update.note }}</p></div></li>{% endfor %}</ol></section>
+      <section class="content-card risk-explanation"><div><h2>Rules-based risk assessment</h2>{{ status_badge(incident.risk_level) }}</div>{% if incident.source == 'SOS' %}<p>This case was created from an emergency SOS activation. Every demo SOS request is automatically classified CRITICAL so responders treat it with top priority, regardless of which indicators were selected.</p>{% else %}<p>{{ assessment.explanation }}</p>{% endif %}<small>This deterministic priority indicator supports review; it is not AI and does not replace professional judgement.</small></section>
+    </div>
+    <aside class="content-card case-summary"><h2>Incident summary</h2><dl><div><dt>Category</dt><dd>{{ incident.category }}</dd></div><div><dt>Incident date</dt><dd>{{ incident.incident_date.strftime('%d %b %Y') }}</dd></div><div><dt>General area</dt><dd>{{ incident.location }}</dd></div><div><dt>Identity setting</dt><dd>{{ 'Hidden from responder views' if incident.is_anonymous else 'Account-linked' }}</dd></div><div><dt>Contact preference</dt><dd>{{ (incident.preferred_contact_method or 'IN_APP')|replace('_',' ')|title }}</dd></div><div><dt>Safe instructions</dt><dd>{{ incident.safe_contact or 'Not provided' }}</dd></div></dl><div class="summary-note"><strong>Your description</strong><p>{{ incident.description }}</p></div></aside>
+  </div>
+</div></section>
+{% endblock %}

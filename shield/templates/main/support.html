@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% from 'macros/forms.html' import empty_state %}
+{% block title %}Support resources — SHEild Response{% endblock %}
+{% block content %}
+<section class="page-hero page-hero--compact"><p class="eyebrow">Support directory</p><h1>Support should meet you where you are.</h1><p>These fictional listings demonstrate how verified services could be presented. They are not real service providers.</p></section>
+<section class="section support-layout">
+  <div><div class="section-heading section-heading--left"><h2>Available support types</h2><p>Choose only what feels safe and useful to you.</p></div>
+    {% if services %}<div class="service-list">{% for service in services %}<article class="service-card service-card--wide"><div><span class="service-card__category">{{ service.category }}</span><h3>{{ service.name }}</h3><p>{{ service.description }}</p></div><dl>{% if service.phone %}<div><dt>Phone</dt><dd>{{ service.phone }}</dd></div>{% endif %}{% if service.email %}<div><dt>Email</dt><dd>{{ service.email }}</dd></div>{% endif %}{% if service.hours %}<div><dt>Hours</dt><dd>{{ service.hours }}</dd></div>{% endif %}</dl></article>{% endfor %}</div>{% else %}{{ empty_state('No services listed', 'An administrator can add verified support resources.') }}{% endif %}
+  </div>
+  <aside class="contact-panel"><span class="contact-panel__icon">!</span><h2>Emergency contacts</h2><p>This prototype does not dispatch help. Verify numbers for your location before relying on them.</p>{% for contact in contacts %}<div class="contact-item"><strong>{{ contact.name }}</strong><a href="tel:{{ contact.phone }}">{{ contact.phone }}</a><small>{{ contact.description }}</small></div>{% endfor %}</aside>
+</section>
+{% endblock %}

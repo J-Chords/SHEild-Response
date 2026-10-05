@@ -1,0 +1,41 @@
+{% extends 'base.html' %}{% from 'macros/forms.html' import render_field, status_badge %}
+{% block title %}Manage {{ incident.case_number }} — SHEild Response{% endblock %}
+{% block content %}<section class="dashboard-shell">{% include 'partials/dashboard_nav.html' %}<div class="dashboard-main">
+<a class="back-link" href="{{ url_for('admin.incidents') }}">← Back to incidents</a>
+<div class="case-heading"><div><p class="eyebrow">Administrative case view</p><h1>{{ incident.case_number }}</h1><p>{{ incident.category }} · submitted {{ incident.created_at.strftime('%d %B %Y') }}</p></div><div class="case-heading__badges">{% if incident.source == 'SOS' %}<span class="badge badge--critical">Emergency SOS</span>{% endif %}{{ status_badge(incident.risk_level) }}{{ status_badge(incident.status) }}</div></div>
+<div class="content-grid content-grid--case">
+  <div>
+    <section class="content-card case-description">
+      <h2>Minimum necessary details</h2>
+      <dl><div><dt>Source</dt><dd>{{ 'Emergency SOS' if incident.source == 'SOS' else 'Normal report' }}</dd></div><div><dt>Reporter setting</dt><dd>{{ 'Anonymous Report' if incident.is_anonymous else 'Account-linked' }}</dd></div><div><dt>Area</dt><dd>{{ incident.location }}</dd></div><div><dt>Safe contact</dt><dd>{{ incident.safe_contact or 'Not supplied' }}</dd></div><div><dt>Assigned to</dt><dd>{{ incident.assigned_to.full_name if incident.assigned_to else 'Unassigned' }}</dd></div></dl>
+      <h3>Description</h3><p>{{ incident.description }}</p>
+    </section>
+    <section class="content-card risk-explanation">
+      <div><h2>Safety indicators</h2>{{ status_badge(incident.risk_level) }}</div>
+      <ul class="safety-indicator-list">
+        <li class="{{ 'is-flagged' if incident.immediate_danger }}">Immediate danger{{ ' — selected' if incident.immediate_danger }}</li>
+        <li class="{{ 'is-flagged' if incident.threat_to_life }}">Threat to life{{ ' — selected' if incident.threat_to_life }}</li>
+        <li class="{{ 'is-flagged' if incident.weapon_involved }}">Weapon involved{{ ' — selected' if incident.weapon_involved }}</li>
+        <li class="{{ 'is-flagged' if incident.medical_attention }}">Possible medical attention{{ ' — selected' if incident.medical_attention }}</li>
+        <li class="{{ 'is-flagged' if incident.dependants_at_risk }}">Dependants at risk{{ ' — selected' if incident.dependants_at_risk }}</li>
+      </ul>
+      <small>This deterministic priority indicator supports review; it is not AI and does not replace professional judgement.</small>
+    </section>
+    {% if linked_alert %}<section class="content-card">
+      <h2>Linked emergency alert</h2>
+      <dl><div><dt>Alert reference</dt><dd>{{ linked_alert.alert_number }}</dd></div><div><dt>Alert status</dt><dd>{{ status_badge(linked_alert.status) }}</dd></div><div><dt>Acknowledged</dt><dd>{{ linked_alert.acknowledged_at.strftime('%d %b · %H:%M') if linked_alert.acknowledged_at else 'Not yet acknowledged' }}</dd></div><div><dt>Assigned responder</dt><dd>{{ linked_alert.assigned_to.full_name if linked_alert.assigned_to else 'Unassigned' }}</dd></div></dl>
+      <a class="text-link" href="{{ url_for('admin.alerts', q=linked_alert.alert_number) }}">View in emergency alerts →</a>
+    </section>{% endif %}
+    <section class="content-card">
+      <h2>Complete case timeline</h2>
+      <p class="action-hint">Includes responder actions, internal notes, referrals and administrative changes. Admin is an authorised operational role and may view internal entries here.</p>
+      <ol class="timeline timeline--compact">{% for update in incident.updates|reverse %}<li><span class="timeline__dot"></span><div><div class="timeline__meta"><strong>{{ describe_update(update) }}</strong><time>{{ update.created_at.strftime('%d %b · %H:%M') }}</time></div><p>{{ update.note }}</p><span class="timeline-tag timeline-tag--{{ 'internal' if update.visibility == 'INTERNAL' else ('system' if update.visibility == 'SYSTEM' else 'reporter') }}">{{ update_author_label(update) }} · {{ update.visibility|replace('_',' ')|title }}{% if update.support_service %} · Referred to {{ update.support_service.name }}{% endif %}</span></div></li>{% endfor %}</ol>
+    </section>
+  </div>
+  <aside class="content-card action-panel">
+    <h2>Assign / reassign & status</h2>
+    <p>{% if incident.assigned_to_id %}Changing the responder below deliberately reassigns this case.{% else %}This case is currently unassigned — choose a responder to assign it.{% endif %} This action always creates a timeline entry.</p>
+    <form method="post" novalidate>{{ form.hidden_tag() }}{{ render_field(form.responder_id) }}{{ render_field(form.status) }}{{ render_field(form.risk_level) }}{{ render_field(form.note, rows=6) }}{{ form.submit(class='button button--full') }}</form>
+  </aside>
+</div>
+</div></section>{% endblock %}

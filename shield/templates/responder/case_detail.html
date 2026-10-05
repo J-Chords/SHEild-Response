@@ -1,0 +1,55 @@
+{% extends 'base.html' %}{% from 'macros/forms.html' import render_field, status_badge %}
+{% block title %}Case {{ incident.case_number }} — Responder{% endblock %}
+{% block content %}<section class="dashboard-shell">{% include 'partials/dashboard_nav.html' %}<div class="dashboard-main">
+<a class="back-link" href="{{ url_for('responder.cases') }}">← Back to case queue</a>
+<div class="case-heading">
+  <div><p class="eyebrow">Responder case view</p><h1>{{ incident.case_number }}</h1><p>{{ incident.category }} · submitted {{ incident.created_at.strftime('%d %B %Y') }}</p></div>
+  <div class="case-heading__badges">{% if incident.source == 'SOS' %}<span class="badge badge--critical">Emergency SOS</span>{% endif %}{{ status_badge(incident.risk_level) }}{{ status_badge(incident.status) }}</div>
+</div>
+<div class="assignment-state">
+  <span class="{{ 'assignment-state__ready' if incident.assigned_to_id else '' }}">●</span>
+  <div><strong>{{ 'Assigned to you' if incident.assigned_to_id else 'Unassigned — claim to begin' }}</strong><p>{{ 'You can record notes, updates and status changes below.' if incident.assigned_to_id else 'Claim this case to start recording actions.' }}</p></div>
+  {% if not incident.assigned_to_id %}<form method="post" action="{{ url_for('responder.claim_case', incident_id=incident.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="button button--small" type="submit">Claim case</button></form>{% endif %}
+</div>
+<div class="privacy-callout"><strong>{{ 'Anonymous report' if incident.is_anonymous else 'Identity minimised' }}</strong><span>Reporter identity is not shown here. Use only the stated safe-contact preference.</span></div>
+<div class="content-grid content-grid--case">
+  <div>
+    <section class="content-card case-description">
+      <h2>Incident information</h2>
+      <dl><div><dt>Location</dt><dd>{{ incident.location }}</dd></div><div><dt>Incident date</dt><dd>{{ incident.incident_date.strftime('%d %b %Y') }}</dd></div><div><dt>Safe contact</dt><dd>{{ incident.safe_contact or 'No contact method provided' }}</dd></div></dl>
+      <h3>Description</h3><p>{{ incident.description }}</p>
+    </section>
+    <section class="content-card risk-explanation">
+      <div><h2>Safety indicators & risk</h2>{{ status_badge(incident.risk_level) }}</div>
+      <ul class="safety-indicator-list">
+        <li class="{{ 'is-flagged' if incident.immediate_danger }}">Immediate danger{{ ' — selected' if incident.immediate_danger }}</li>
+        <li class="{{ 'is-flagged' if incident.threat_to_life }}">Threat to life{{ ' — selected' if incident.threat_to_life }}</li>
+        <li class="{{ 'is-flagged' if incident.weapon_involved }}">Weapon involved{{ ' — selected' if incident.weapon_involved }}</li>
+        <li class="{{ 'is-flagged' if incident.medical_attention }}">Possible medical attention{{ ' — selected' if incident.medical_attention }}</li>
+        <li class="{{ 'is-flagged' if incident.dependants_at_risk }}">Dependants at risk{{ ' — selected' if incident.dependants_at_risk }}</li>
+      </ul>
+      {% if incident.source == 'SOS' %}<p>This case was created from an emergency SOS activation. Every demo SOS request is automatically classified CRITICAL so responders treat it with top priority, regardless of which indicators were selected.</p>{% else %}<p>{{ assessment.explanation }}</p>{% endif %}
+      <small>This deterministic priority indicator supports review; it is not AI and does not replace professional judgement. You may update the risk level using the form if your assessment changes.</small>
+    </section>
+    <section class="content-card">
+      <h2>Case history</h2>
+      <ol class="timeline timeline--compact">{% for update in incident.updates|reverse %}<li><span class="timeline__dot"></span><div><div class="timeline__meta"><strong>{{ describe_update(update) }}</strong><time>{{ update.created_at.strftime('%d %b · %H:%M') }}</time></div><p>{{ update.note }}</p><span class="timeline-tag timeline-tag--{{ 'internal' if update.visibility == 'INTERNAL' else ('system' if update.visibility == 'SYSTEM' else 'reporter') }}">{{ 'Internal note' if update.visibility == 'INTERNAL' else ('System event' if update.visibility == 'SYSTEM' else 'Reporter-visible') }}</span></div></li>{% endfor %}</ol>
+    </section>
+  </div>
+  <aside>
+    <section class="content-card action-panel">
+      <h2>Update status & risk</h2>
+      <p>Keep notes factual, concise and free of unnecessary personal data.</p>
+      {% if allowed_statuses|length > 1 %}<p class="action-hint">Allowed next steps from {{ incident.status|replace('_',' ')|title }}: {{ (allowed_statuses|reject('equalto', incident.status)|list)|map('replace', '_', ' ')|map('title')|join(', ') }}.</p>{% else %}<p class="action-hint">{{ incident.status|replace('_',' ')|title }} is a terminal status for responders.</p>{% endif %}
+      <form method="post" novalidate>{{ form.hidden_tag() }}{{ render_field(form.status) }}{{ render_field(form.risk_level) }}{{ render_field(form.note, rows=5) }}{{ render_field(form.visible_to_reporter) }}{{ form.submit(class='button button--full') }}</form>
+    </section>
+    <section class="content-card">
+      <h2>More actions</h2>
+      <details class="action-disclosure"><summary>Add internal note</summary><div class="action-disclosure__body"><p class="action-hint">Visible to responders and admins only — never to the reporter.</p><form method="post" action="{{ url_for('responder.add_internal_note', incident_id=incident.id) }}" novalidate>{{ note_form.hidden_tag() }}{{ render_field(note_form.note, rows=4) }}{{ note_form.submit(class='button button--secondary button--full') }}</form></div></details>
+      <details class="action-disclosure"><summary>Add update for reporter</summary><div class="action-disclosure__body"><p class="action-hint">Appears in the reporter's own case timeline.</p><form method="post" action="{{ url_for('responder.add_reporter_update', incident_id=incident.id) }}" novalidate>{{ reporter_update_form.hidden_tag() }}{{ render_field(reporter_update_form.note, rows=4) }}{{ reporter_update_form.submit(class='button button--secondary button--full') }}</form></div></details>
+      <details class="action-disclosure"><summary>Record response action</summary><div class="action-disclosure__body"><p class="action-hint">Internal operational log (contact attempts, safety checks, follow-ups).</p><form method="post" action="{{ url_for('responder.add_response_action', incident_id=incident.id) }}" novalidate>{{ action_form.hidden_tag() }}{{ render_field(action_form.action_type) }}{{ render_field(action_form.note, rows=3) }}{{ action_form.submit(class='button button--secondary button--full') }}</form></div></details>
+      <details class="action-disclosure"><summary>Record referral</summary><div class="action-disclosure__body"><p class="action-hint">Uses the fictional support directory. Recorded in the prototype only — no real service is contacted.</p><form method="post" action="{{ url_for('responder.add_referral', incident_id=incident.id) }}" novalidate>{{ referral_form.hidden_tag() }}{{ render_field(referral_form.support_service_id) }}{{ render_field(referral_form.note, rows=3) }}{{ render_field(referral_form.mark_referred) }}{{ referral_form.submit(class='button button--secondary button--full') }}</form></div></details>
+    </section>
+  </aside>
+</div>
+</div></section>{% endblock %}

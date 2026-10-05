@@ -1,0 +1,25 @@
+<aside class="dashboard-nav" aria-label="Dashboard navigation">
+  <div class="dashboard-user"><span class="avatar">{{ current_user.full_name[:1]|upper }}</span><div><strong>{{ current_user.full_name }}</strong><small>{{ current_user.role|title }}</small></div></div>
+  <nav>
+    {% if current_user.role == 'REPORTER' %}
+      <a class="{{ 'is-active' if request.endpoint == 'reporter.dashboard' }}" href="{{ url_for('reporter.dashboard') }}">Overview</a>
+      <a class="{{ 'is-active' if request.endpoint in ['reporter.reports', 'reporter.report_detail', 'reporter.report_confirmation'] }}" href="{{ url_for('reporter.reports') }}">My reports</a>
+      <a class="{{ 'is-active' if request.endpoint == 'reporter.new_report' }}" href="{{ url_for('reporter.new_report') }}">Submit a report</a>
+      <a class="dashboard-nav__alert {{ 'is-active' if request.endpoint == 'reporter.sos' }}" href="{{ url_for('reporter.sos') }}">Emergency SOS</a>
+    {% elif current_user.role == 'RESPONDER' %}
+      <a class="{{ 'is-active' if request.endpoint == 'responder.dashboard' }}" href="{{ url_for('responder.dashboard') }}">Overview</a>
+      <a class="{{ 'is-active' if 'case' in request.endpoint }}" href="{{ url_for('responder.cases') }}">Case queue</a>
+      <a class="dashboard-nav__alert {{ 'is-active' if 'alert' in request.endpoint }}" href="{{ url_for('responder.alerts') }}">Emergency queue</a>
+    {% elif current_user.role == 'ADMIN' %}
+      <a class="{{ 'is-active' if request.endpoint == 'admin.dashboard' }}" href="{{ url_for('admin.dashboard') }}">Overview</a>
+      <a class="{{ 'is-active' if 'incident' in request.endpoint }}" href="{{ url_for('admin.incidents') }}">Incidents</a>
+      <a class="dashboard-nav__alert {{ 'is-active' if request.endpoint == 'admin.alerts' }}" href="{{ url_for('admin.alerts') }}">Emergency alerts</a>
+      <a class="{{ 'is-active' if request.endpoint in ['admin.responders', 'admin.new_responder'] }}" href="{{ url_for('admin.responders') }}">Responders</a>
+      <a class="{{ 'is-active' if request.endpoint == 'admin.users' }}" href="{{ url_for('admin.users') }}">All users</a>
+      <a class="{{ 'is-active' if request.endpoint in ['admin.services', 'admin.edit_service'] }}" href="{{ url_for('admin.services') }}">Support services</a>
+      <a class="{{ 'is-active' if request.endpoint in ['admin.contacts', 'admin.edit_contact'] }}" href="{{ url_for('admin.contacts') }}">Emergency contacts</a>
+      <a class="{{ 'is-active' if request.endpoint == 'admin.activity' }}" href="{{ url_for('admin.activity') }}">Activity log</a>
+    {% endif %}
+  </nav>
+  <div class="dashboard-nav__support"><span aria-hidden="true">◉</span><strong>Need a safer screen?</strong><p>Quick Exit is always available at the lower right.</p></div>
+</aside>
